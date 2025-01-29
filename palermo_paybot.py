@@ -76,7 +76,7 @@ def paybot(order_numbers):
         batchpay = short_wait(By.CLASS_NAME, "pay")
         batchpay.click()
 
-        paypal_button = short_wait(By.XPATH, '/html/body/div[3]/div[2]/div/div[2]/dl/ul/li[1]')
+        paypal_button = long_wait(By.XPATH, '/html/body/div[3]/div[2]/div/div[2]/dl/ul/li[1]')
         paypal_button.click()
 
         pay_button = short_wait(By.CLASS_NAME, 'pay-btn')
