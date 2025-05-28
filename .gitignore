@@ -1,0 +1,6 @@
+.env
+.DS_STORE
+venv
+account_token.txt
+__pycache__
+logs/

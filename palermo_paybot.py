@@ -1,19 +1,13 @@
 import traceback
 import time
 import os
-import undetected_chromedriver as webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.support import expected_conditions as EC
-from email_utils import send_email
-from dotenv import load_dotenv
-
-load_dotenv()
+from utils.email_utils import send_email
+from utils.selenium_setup import *
+from config import *
 
 def paybot(order_numbers):
     try:
-        driver = webdriver.Chrome()
+        driver = get_driver()
 
         # selenium shortcuts
         driver_short_wait = WebDriverWait(driver, 10)
@@ -69,41 +63,59 @@ def paybot(order_numbers):
             select = Select(select_dropdown)
             select.select_by_value('50')
 
-        checkbox = short_wait(By.CLASS_NAME, "checkBox")
-        if not checkbox.is_selected():
-            checkbox.click()
+        select_all_checkbox = short_wait(By.CLASS_NAME, "checkBox")
+        if not select_all_checkbox.is_selected():
+            select_all_checkbox.click()
 
-        batchpay = short_wait(By.CLASS_NAME, "pay")
-        batchpay.click()
+        batchpay_btn = short_wait(By.CLASS_NAME, "pay")
+        batchpay_btn.click()
 
         paypal_button = long_wait(By.XPATH, '/html/body/div[3]/div[2]/div/div[2]/dl/ul/li[1]')
         paypal_button.click()
 
-        pay_button = short_wait(By.CLASS_NAME, 'pay-btn')
-        pay_button.click()
+        proceed_to_checkout_btn = short_wait(By.CLASS_NAME, 'pay-btn')
+        proceed_to_checkout_btn.click()
 
-        pp_email_field = short_wait(By.ID, 'email')
-        pp_email_field.send_keys(os.getenv('PP_EMAIL'))
-        login_next_btn = short_wait(By.ID, 'btnNext')
-        login_next_btn.click()
+        # log in if necessary
+        try:
+            pp_email_field = short_wait(By.ID, 'email')
+            pp_email_field.send_keys(os.getenv('PP_EMAIL'))
+            login_next_btn = short_wait(By.ID, 'btnNext')
+            login_next_btn.click()
 
-        pp_pw_field = long_wait(By.ID, 'password')
-        pp_pw_field.send_keys(os.getenv('PP_PW'))
-        login_btn = short_wait(By.ID, 'btnLogin')
-        login_btn.click()
+            pp_pw_field = long_wait(By.ID, 'password')
+            pp_pw_field.send_keys(os.getenv('PP_PW'))
+            login_btn = short_wait(By.ID, 'btnLogin')
+            login_btn.click()
+        except (TimeoutException, NoSuchElementException):
+            logger.info("Login not required or already logged in")
 
-        send_payment_btn = long_wait(By.ID, 'payment-submit-btn')
-        send_payment_btn.click()
+        # opt out for touch id login if necessary
+        try:
+            decline_touch_id_btn = short_wait(By.ID, 'optIn_notNow')
+            decline_touch_id_btn.click()
+        except NoSuchElementException:
+            logger.info('opt out button didnt appear or not necessary')
+        
+        # select payment type
+        try:
+            credit_card_select = long_wait(By.CSS_SELECTOR, 'label[for="CC-MQJ6WJEK27W2A-funding-option"]')
+            credit_card_select.click()
 
-        payment_confirmation = long_wait(By.XPATH, '/html/body/div[3]/div[2]/div/p[2]')
-        payment_confirmation_text = payment_confirmation.text
-        print(f'{payment_confirmation_text}')
+            send_payment_btn = long_wait(By.ID, 'payment-submit-btn')
+            send_payment_btn.click()
+
+            payment_confirmation = long_wait(By.XPATH, '/html/body/div[3]/div[2]/div/p[2]')
+            payment_confirmation_text = payment_confirmation.text
+            logger.info(f'{payment_confirmation_text}')
+        except Exception as e:
+            logger.error(f"Payment failed: {e}")
 
         driver.quit()
 
-        print(f'Palermo paybot ran successfully and processed orders: {order_numbers}')
+        logger.info(f'Palermo paybot ran successfully and processed orders: {order_numbers}')
         send_email("Palermo Paybot Ran Sucessfully", f"Palermo paybot ran successfully and processed orders: {order_numbers}")
     except Exception as e:
         error_message = traceback.format_exc()
-        print(f"paybot failed", f"ERROR MESSAGE: {e}\n {error_message}")
+        logger.error(f"paybot failed", f"ERROR MESSAGE: {e}\n {error_message}")
         send_email(f"palermo payBot failed", f"ERROR MESSAGE: {e}\n {error_message}")

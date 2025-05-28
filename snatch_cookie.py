@@ -4,13 +4,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 import os
-from dotenv import load_dotenv
+from config import *
+from utils.selenium_setup import *
 
-load_dotenv()
-
-cookie_file = '/Users/flippackstation5/Python_Scripts/palermo_bot/account_token.txt'
-
-driver = webdriver.Chrome()
+driver = get_driver()
 
 # selenium shortcuts
 driver_short_wait = WebDriverWait(driver, 10)
@@ -57,13 +54,13 @@ account_token = None
 for cookie in cookies:
     if cookie['name'] == 'account_token':
         account_token = cookie['value']
-        print(f"new account token scraped: {account_token}")
+        logger.info(f"new account token scraped: {account_token}")
         break
 
 # save cookie to file
 if account_token:
-    with open(cookie_file, 'w') as f:
+    with open(TOKEN_FILE, 'w') as f:
         f.write(account_token)
-        print(f"new account token saved to file: {account_token}")
+        logger.info(f"new account token saved to file: {account_token}")
 
 driver.quit()
