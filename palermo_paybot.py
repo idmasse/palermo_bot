@@ -102,7 +102,7 @@ def paybot(order_numbers):
             credit_card_select = long_wait(By.CSS_SELECTOR, 'label[for="CC-MQJ6WJEK27W2A-funding-option"]')
             credit_card_select.click()
 
-            send_payment_btn = long_wait(By.ID, 'payment-submit-btn')
+            send_payment_btn = long_wait(By.XPATH, "//button[@data-id='payment-submit-btn']")
             send_payment_btn.click()
 
             payment_confirmation = long_wait(By.XPATH, '/html/body/div[3]/div[2]/div/p[2]')
