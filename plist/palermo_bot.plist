@@ -7,13 +7,13 @@
     <key>ProgramArguments</key>
     <array>
         <string>/Users/flippackstation5/python_scripts/palermo_bot/dlvenv/bin/python</string>
-        <string>/Users/flippackstation5/python_scripts/palermo_bot/palermo_find_orders.py</string>
+        <string>/Users/flippackstation5/python_scripts/palermo_bot/find_orders.py</string>
     </array>
     <key>StartInterval</key>
     <integer>7200</integer>
     <key>StandardErrorPath</key>
-    <string>/Users/flippackstation5/python_scripts/palermo_bot/palermo_find_orders.err</string>
+    <string>/Users/flippackstation5/python_scripts/palermo_bot/find_orders.err</string>
     <key>StandardOutPath</key>
-    <string>/Users/flippackstation5/python_scripts/palermo_bot/palermo_find_orders.out</string>
+    <string>/Users/flippackstation5/python_scripts/palermo_bot/find_orders.out</string>
 </dict>
 </plist>
