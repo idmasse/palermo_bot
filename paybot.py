@@ -6,6 +6,8 @@ from utils.selenium_setup import *
 from config import *
 
 def paybot(order_numbers):
+    payment_sucess = False
+
     try:
         driver = get_driver()
 
@@ -76,46 +78,66 @@ def paybot(order_numbers):
         proceed_to_checkout_btn = short_wait(By.CLASS_NAME, 'pay-btn')
         proceed_to_checkout_btn.click()
 
-        # log in if necessary
         try:
-            pp_email_field = short_wait(By.ID, 'email')
-            pp_email_field.send_keys(os.getenv('PP_EMAIL'))
-            login_next_btn = short_wait(By.ID, 'btnNext')
-            login_next_btn.click()
+            # log in if necessary
+            try:
+                pp_email_field = short_wait(By.ID, 'email')
+                pp_email_field.send_keys(os.getenv('PP_EMAIL'))
+                login_next_btn = short_wait(By.ID, 'btnNext')
+                login_next_btn.click()
 
-            pp_pw_field = long_wait(By.ID, 'password')
-            pp_pw_field.send_keys(os.getenv('PP_PW'))
-            login_btn = short_wait(By.ID, 'btnLogin')
-            login_btn.click()
-        except (TimeoutException, NoSuchElementException):
-            logger.info("Login not required or already logged in")
+                pp_pw_field = long_wait(By.ID, 'password')
+                pp_pw_field.send_keys(os.getenv('PP_PW'))
+                login_btn = short_wait(By.ID, 'btnLogin')
+                login_btn.click()
+            except (TimeoutException, NoSuchElementException):
+                pass
 
-        # opt out for touch id login if necessary
-        try:
-            decline_touch_id_btn = short_wait(By.ID, 'optIn_notNow')
-            decline_touch_id_btn.click()
-        except NoSuchElementException:
-            logger.info('opt out button didnt appear or not necessary')
-        
-        # select payment type
-        try:
+            # opt out for touch id login if necessary
+            try:
+                decline_touch_id_btn = short_wait(By.ID, 'optIn_notNow')
+                decline_touch_id_btn.click()
+            except NoSuchElementException:
+                pass
+
+            # select correct cc funding option
             credit_card_select = long_wait(By.CSS_SELECTOR, 'label[for="CC-MQJ6WJEK27W2A-funding-option"]')
             credit_card_select.click()
 
+            # click continue to Review order btn
             send_payment_btn = long_wait(By.XPATH, "//button[@data-id='payment-submit-btn']")
             send_payment_btn.click()
 
+            # wait for confirmation text to appear
             payment_confirmation = long_wait(By.XPATH, '/html/body/div[3]/div[2]/div/p[2]')
             payment_confirmation_text = payment_confirmation.text
-            logger.info(f'{payment_confirmation_text}')
+            logger.info(f'Payment confirmation: {payment_confirmation_text}')
+
+            payment_success = True
+
         except Exception as e:
             logger.error(f"Payment failed: {e}")
 
         driver.quit()
 
-        logger.info(f'Palermo paybot ran successfully and processed orders: {order_numbers}')
-        send_email("Palermo Paybot Ran Sucessfully", f"Palermo paybot ran successfully and processed orders: {order_numbers}")
+        if payment_success:
+            logger.info(f'Palermo paybot ran successfully and processed orders: {order_numbers}')
+            send_email(
+                "Palermo Paybot Ran Successfully",
+                f"Palermo paybot ran successfully and processed orders: {order_numbers}"
+            )
+        else:
+            # inner try to catch payment exceptions
+            logger.error(f"Palermo paybot failed during payment for orders: {order_numbers}")
+            send_email(
+                "Palermo Paybot Failed to Process Payment",
+                f"Palermo paybot encountered an error during payment for orders: {order_numbers}"
+            )
+
     except Exception as e:
         error_message = traceback.format_exc()
-        logger.error(f"paybot failed", f"ERROR MESSAGE: {e}\n {error_message}")
-        send_email(f"palermo payBot failed", f"ERROR MESSAGE: {e}\n {error_message}")
+        logger.error(f"paybot failed: {e}\n{error_message}")
+        send_email(
+            "Palermo Paybot Failed",
+            f"ERROR MESSAGE: {e}\n{error_message}"
+        )

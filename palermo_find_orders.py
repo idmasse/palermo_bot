@@ -1,5 +1,5 @@
 import requests
-from palermo_paybot import paybot
+from paybot import paybot
 from utils.email_utils import send_email
 import os 
 from config import *
