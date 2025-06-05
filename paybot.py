@@ -6,7 +6,7 @@ from utils.selenium_setup import *
 from config import *
 
 def paybot(order_numbers):
-    payment_sucess = False
+    payment_success = False
 
     try:
         driver = get_driver()
