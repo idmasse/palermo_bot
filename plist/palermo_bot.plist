@@ -3,10 +3,10 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.palermo-paybot.script</string>
+    <string>com.palermo_paybot.main</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/Users/flippackstation5/python_scripts/palermo_bot/dlvenv/bin/python</string>
+        <string>/Users/flippackstation5/python_scripts/palermo_bot/pvenv/bin/python</string>
         <string>/Users/flippackstation5/python_scripts/palermo_bot/find_orders.py</string>
     </array>
     <key>StartInterval</key>
